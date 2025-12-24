@@ -1,7 +1,6 @@
 services:
   mcp-searxng:
     build: .
-    container_name: mcp-searxng
     expose:
       - "3000"
     environment:
@@ -14,12 +13,3 @@ services:
       retries: 3
       start_period: 10s
     restart: unless-stopped
-    networks:
-      - coolify
-    labels:
-      - "traefik.enable=true"
-      - "traefik.http.services.mcp-searxng.loadbalancer.server.port=3000"
-
-networks:
-  coolify:
-    external: true
