@@ -1,6 +1,3 @@
-# Coolify-compatible docker-compose
-# Traefik handles external routing - no need to expose ports
-
 services:
   mcp-searxng:
     build: .
@@ -17,6 +14,12 @@ services:
       retries: 3
       start_period: 10s
     restart: unless-stopped
+    networks:
+      - coolify
     labels:
       - "traefik.enable=true"
       - "traefik.http.services.mcp-searxng.loadbalancer.server.port=3000"
+
+networks:
+  coolify:
+    external: true
