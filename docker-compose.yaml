@@ -1,13 +1,12 @@
-# Local development docker-compose
-# Run: docker-compose up -d
-# Test: curl http://localhost:3000/health
+# Coolify-compatible docker-compose
+# Traefik handles external routing - no need to expose ports
 
 services:
   mcp-searxng:
     build: .
     container_name: mcp-searxng
-    ports:
-      - "3000:3000"
+    expose:
+      - "3000"
     environment:
       - SEARXNG_URL=${SEARXNG_URL:-https://searxng.ogmios.se}
       - MCP_HTTP_PORT=3000
@@ -18,17 +17,6 @@ services:
       retries: 3
       start_period: 10s
     restart: unless-stopped
-
-  # Optional: Caddy for local auth testing
-  caddy:
-    image: caddy:2-alpine
-    container_name: mcp-searxng-proxy
-    ports:
-      - "3001:3001"
-    volumes:
-      - ./Caddyfile:/etc/caddy/Caddyfile:ro
-    depends_on:
-      - mcp-searxng
-    restart: unless-stopped
-    profiles:
-      - with-auth
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.services.mcp-searxng.loadbalancer.server.port=3000"
