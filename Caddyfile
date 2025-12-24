@@ -1,0 +1,28 @@
+# Caddy configuration for Bearer token authentication
+# Used for local testing with auth enabled
+#
+# Run: docker-compose --profile with-auth up -d
+# Test: curl -H "Authorization: Bearer your-token" http://localhost:3001/health
+
+:3001 {
+    # Check Bearer token
+    @auth {
+        header Authorization "Bearer {$MCP_AUTH_TOKEN}"
+    }
+
+    # Health endpoint - no auth required
+    handle /health {
+        reverse_proxy mcp-searxng:3000
+    }
+
+    # All other requests require auth
+    handle {
+        @no_auth not header Authorization *
+        respond @no_auth "Unauthorized" 401
+
+        @wrong_auth not header Authorization "Bearer {$MCP_AUTH_TOKEN}"
+        respond @wrong_auth "Forbidden" 403
+
+        reverse_proxy @auth mcp-searxng:3000
+    }
+}
